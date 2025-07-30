@@ -8,6 +8,8 @@ TinyGPSPlus gps;
 #define GPS_RX_PIN 16  // GPS TX -> ESP32 RX
 #define GPS_TX_PIN 3   // GPS RX <- ESP32 TX
 
+
+
 void initGPS(){
 
   // Setup GPS UART
@@ -22,26 +24,26 @@ void readGPS(){
   }
 }
 
-bool getLocation(float& lat, float& lng){
-
-  while(GPS.available()){
-    gps.encode(GPS.read());
-  }
-
-  if(gps.location.isValid()){
+bool getLocation(float& lat, float& lng) {
+  if (gps.location.isValid()) {
     lat = gps.location.lat();
     lng = gps.location.lng();
     return true;
   }
-
   return false;
-
 }
 
 String getTimestamp() {
   if (gps.time.isValid()) {
-    char buf[16];
-    snprintf(buf, sizeof(buf), "%02d:%02d", gps.time.hour(), gps.time.minute());
+    int utcHour = gps.time.hour();
+    int localHour = utcHour - 5;
+
+    if (localHour < 0) {
+      localHour += 24;
+    }
+
+    char buf[6]; 
+    snprintf(buf, sizeof(buf), "%02d:%02d", localHour, gps.time.minute());
     return String(buf);
   }
   return String("??:??");

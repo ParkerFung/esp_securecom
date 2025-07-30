@@ -2,13 +2,19 @@
 #include "input.h"
 #include "interface.h"
 #include "radio.h"
-#include "gps.h"
+#include "gps/gps.h"
 
 extern int selectedItemMenu;
 extern int selectedItemSend;
 extern int selectedItemReceived;
 extern int selectedItemAffirmative;
 extern int selectedItemNegative;
+
+extern bool navActive;
+extern double targetLat;
+extern double targetLng;
+
+static int receivedScrollOffset = 0;
 
 #define LONG_PRESS_DURATION 500 // milliseconds
 
@@ -46,10 +52,12 @@ void handleInput() {
       break;
     case RECEIVED:
       selectedItemPtr = &selectedItemReceived;
-      maxItems = 3; // received messages count 
+      maxItems = receivedMessages.size(); // received messages count 
+      if (maxItems == 0) maxItems = 1;
       break;
     case COORDS:
-      // No selectable items in coordinates screen
+    case NAVIGATION:
+      // No selectable items in coordinates or navigation screen
       break;
   }
 
@@ -72,6 +80,8 @@ void handleInput() {
     }
   }
 
+
+  // Handle select button press/release logic
   if (digitalRead(BUTTON_SELECT) == LOW) {
     if (!selectPressed) {
       selectPressStart = millis();
@@ -79,17 +89,26 @@ void handleInput() {
       longPressTriggered = false;
     } else {
       if (!longPressTriggered && (millis() - selectPressStart >= LONG_PRESS_DURATION)) {
+        // Long press anywhere returns to MENU and stops navigation
         currentScreen = MENU;
         selectedItemMenu = 0;
         selectedItemSend = 0;
         selectedItemReceived = 0;
+        navActive = false;
         longPressTriggered = true;
         delay(50);
       }
     }
   } else if (selectPressed) {
+    // Select button released - short press actions
     if (!longPressTriggered) {
-      if (currentScreen == MENU) {
+      if (currentScreen == NAVIGATION) {
+        // Short press in NAVIGATION stops nav and goes back to MENU
+        navActive = false;
+        currentScreen = MENU;
+        selectedItemMenu = 0;
+      }
+      else if (currentScreen == MENU) {
         switch (selectedItemMenu) {
           case 0:
             currentScreen = SEND;
@@ -112,7 +131,7 @@ void handleInput() {
             currentScreen = SEND_NEGATIVE;
             break;
           case 2: //distress
-            //distress message logic
+            // distress message logic
             break;
         }
       }
@@ -126,9 +145,18 @@ void handleInput() {
         else{
           msg += "NO GPS";
         }
-        sendMessage(msg);
-        drawMessageSent(msg);
-        delay(5000);
+        drawMessageStatus(msg, "Sending...");
+        bool success = sendMessage(msg);
+
+        if(success){
+          drawMessageStatus(msg, "Message Sent");
+        }
+        else{
+          drawMessageStatus(msg, "Send Failed");
+        }
+
+
+        delay(3000);
 
         currentScreen = MENU;
         selectedItemMenu = 0;
@@ -147,17 +175,49 @@ void handleInput() {
         else{
           msg += "NO GPS";
         }
-        sendMessage(msg);
-        drawMessageSent(msg);
+        drawMessageStatus(msg, "Sending...");
+        bool success = sendMessage(msg);
 
+        if(success){
+          drawMessageStatus(msg, "Message Sent");
+        }
+        else{
+          drawMessageStatus(msg, "Send Failed");
+        }
+
+
+        delay(3000);
 
         currentScreen = MENU;
         selectedItemMenu = 0;
         selectedItemSend = 0;
         selectedItemNegative = 0;
+      }
+      else if (currentScreen == RECEIVED){
+        if (selectedItemReceived < receivedMessages.size()){
+          const ReceivedMessage& msg = receivedMessages[selectedItemReceived];
 
+          if(msg.hasCoordinates){
+            targetLat = msg.latitude;
+            targetLng = msg.longitude;
+            navActive = true;
+            currentScreen = NAVIGATION;
+          }
+          else{
+            display.clearDisplay();
+            display.setTextSize(1);
+            display.setTextColor(SSD1306_WHITE);
+            display.setCursor(0, 20);
+            display.println("NO GPS AVAILABLE");
+            display.println("FOR NAVIGATION");
+            display.display();
+            delay(2000);
+          }
+        }
+        delay(100);
       }
     }
     selectPressed = false;
   }
 }
+

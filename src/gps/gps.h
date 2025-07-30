@@ -2,8 +2,10 @@
 #define GPS_H
 
 #include <TinyGPS++.h>
+#include <HardwareSerial.h>
 
 extern TinyGPSPlus gps;
+extern HardwareSerial GPS;
 
 void initGPS();
 void readGPS();

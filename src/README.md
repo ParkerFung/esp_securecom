@@ -94,13 +94,46 @@ This project began as a learning experience to integrate multiple embedded syste
 - **Message Receiving**  
   Incoming messages are stored with timestamps and can be reviewed.
 
+- **Delivery Acknowledgments (ACK System)**  
+  Sent messages expect an acknowledgment reply so you know if your message was received successfully.
+
 - **OLED UI Navigation**  
   Menu system allows switching between screens: Send, Received, and Coordinates.
 
 - **Live GPS Display**  
   View current coordinates in real time.
 
+  
+- **Navigation Mode**  
+  If a received message includes valid GPS coordinates, pressing **Select** activates a navigation UI showing:
+
+  - Distance to the sender  
+  - Latitude and longitude deltas plotted relative to your current position  
+  - Real-time updates as you move  
+  - Visual indicator blinking on the OLED pinpointing the target location
+
+  Press **Select** again anytime to exit navigation and return to the main menu.
+
 ---
+
+
+## How It Works
+
+### ACK System
+
+Each sent message is assigned a unique message ID. When the receiving device gets a message, it sends back an acknowledgment (ACK) containing that same message ID. This lets the sender confirm that their specific message was received successfully. This system improves reliability, especially in noisy or low-bandwidth LoRa environments, by ensuring messages aren’t lost without notice.
+
+### Navigation UI
+
+If a received message contains valid GPS coordinates, you can select that message to enter the navigation mode. The OLED then displays a graphical representation of your position relative to the target:
+
+- The distance to the target is shown in meters.
+- Latitude and longitude differences are scaled and plotted as x/y offsets on the screen.
+- A blinking dot marks the target location.
+- The display updates live as your GPS position changes, helping you navigate to the sender’s location without any cellular or internet connection.
+
+---
+
 
 ## Why I Built It
 

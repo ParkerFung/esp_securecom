@@ -17,7 +17,7 @@ extern int selectedItemReceived;
 extern int selectedItemAffirmative;
 extern int selectedItemNegative;
 
-enum Screen { MENU, SEND, SEND_AFFIRMATIVE, SEND_NEGATIVE, RECEIVED, COORDS, MESSAGE_SENT };
+enum Screen { MENU, SEND, SEND_AFFIRMATIVE, SEND_NEGATIVE, RECEIVED, COORDS, MESSAGE_SENT, NAVIGATION };
 
 extern Screen currentScreen;
 
@@ -29,7 +29,7 @@ void drawReceived();
 void drawCoords();
 void drawSendAffirmative();
 void drawSendNegative();
-void drawMessageSent(String msg);
+void drawMessageStatus(String msg, String status);
 
 
 

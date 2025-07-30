@@ -1,6 +1,9 @@
 #include "main.h"
 #include "interface.h"
-#include "gps.h"
+#include "gps/gps.h"
+#include "navigation/nav.h"
+#include "navigation/nav_interface.h"
+
 
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
@@ -58,6 +61,14 @@ void drawDisplay(Screen screen){
     case COORDS:
       drawCoords();
       break;
+    case NAVIGATION:
+    if(navActive){
+      nav_display(targetLat, targetLng);
+    }
+    else{
+
+    }
+    break;
     default:
       break;
   }
@@ -179,18 +190,43 @@ void drawReceived() {
 
   newMessageReceived = false;
 
-  int positions[] = {25, 35, 45};
-  for (int i = 0; i < 3; i++) {
-    if (i < receivedMessages.size()) {
-      display.setCursor(0, positions[i]);
-      display.print(receivedMessages[i].content);
-      display.print(" | ");
-      display.println(receivedMessages[i].timestamp);
+  int baseY = 17;
+  int lineSpacing = 20; // space for two lines per message
+
+  int itemsToShow = min(2, (int)receivedMessages.size());
+  for (int i = 0; i < itemsToShow; i++) {
+    int msgIndex = i;
+    const ReceivedMessage& msg = receivedMessages[msgIndex];
+
+    int y = baseY + i * lineSpacing;
+
+    display.setCursor(0, y);
+    if (msgIndex == selectedItemReceived) {
+      display.print(">");
+    } else {
+      display.print(" ");
+    }
+
+
+    display.setCursor(10, y);
+    display.print(msg.content);
+    display.print(" | ");
+    display.print(msg.timestamp);
+
+    display.setCursor(10, y + 10);
+    if (msg.hasCoordinates) {
+      display.print(msg.latitude, 6);
+      display.print(", ");
+      display.print(msg.longitude, 6);
+    } else {
+      display.print("NO GPS");
     }
   }
 
   display.display();
 }
+
+
 
 void drawCoords(){
   display.clearDisplay();
@@ -221,11 +257,11 @@ void drawCoords(){
   display.display();
 }
 
-void drawMessageSent(String msg){
+void drawMessageStatus(String msg, String status){
   display.clearDisplay();
   display.setTextSize(1);
   display.setCursor(0,0);
-  display.println("MESSAGE SENT");
+  display.println(status);
 
   display.setCursor(0,20);
   display.println(msg);
