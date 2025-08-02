@@ -7,13 +7,11 @@
 
 const double EARTH_RADIUS = 6371000.0; //radius in meters
 
-
 double degreesToRadians(double degrees){
     return degrees * (3.14159265358979323846 / 180.0);
 }
 
 double getDistance(double lat1_deg, double lng1_deg, double lat2_deg, double lng2_deg){
-
 
     //convert lat and lng from degrees to rads
     double lat1_rad = degreesToRadians(lat1_deg);

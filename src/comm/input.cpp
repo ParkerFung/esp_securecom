@@ -10,6 +10,8 @@ extern int selectedItemReceived;
 extern int selectedItemAffirmative;
 extern int selectedItemNegative;
 
+
+extern double navScale;
 extern bool navActive;
 extern double targetLat;
 extern double targetLng;
@@ -61,24 +63,50 @@ void handleInput() {
       break;
   }
 
-  if (selectedItemPtr != nullptr) {
-    if (digitalRead(BUTTON_DOWN) == LOW) {
+  // if (selectedItemPtr != nullptr) {
+  //   if (digitalRead(BUTTON_DOWN) == LOW) {
+  //     (*selectedItemPtr)++;
+  //     if (*selectedItemPtr >= maxItems) {
+  //       *selectedItemPtr = 0;
+  //     }
+  //     delay(200);
+  //   }
+
+  //   if (digitalRead(BUTTON_UP) == LOW) {
+  //     if (*selectedItemPtr == 0) {
+  //       *selectedItemPtr = maxItems - 1;
+  //     } else {
+  //       (*selectedItemPtr)--;
+  //     }
+  //     delay(50);
+  //   }
+  // }
+
+  if (digitalRead(BUTTON_DOWN) == LOW) {
+    if (currentScreen == NAVIGATION) {
+      if (navScale < 200.0) navScale += 5.0; // Zoom out
+    } else if (selectedItemPtr != nullptr) {
       (*selectedItemPtr)++;
       if (*selectedItemPtr >= maxItems) {
         *selectedItemPtr = 0;
       }
-      delay(200);
     }
+    delay(50);
+  }
 
-    if (digitalRead(BUTTON_UP) == LOW) {
+  if (digitalRead(BUTTON_UP) == LOW) {
+    if (currentScreen == NAVIGATION) {
+      if (navScale > 5.0) navScale -= 5.0; // Zoom in
+    } else if (selectedItemPtr != nullptr) {
       if (*selectedItemPtr == 0) {
         *selectedItemPtr = maxItems - 1;
       } else {
         (*selectedItemPtr)--;
       }
-      delay(50);
     }
+    delay(50);
   }
+
 
 
   // Handle select button press/release logic

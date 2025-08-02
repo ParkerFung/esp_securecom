@@ -6,7 +6,6 @@
 
 extern bool newMessageReceived;
 
-
 struct ReceivedMessage{
   String raw;
   String content;
@@ -26,6 +25,6 @@ extern float userLng;
 extern double targetLat;
 extern double targetLng;
 extern bool navActive;
-
+extern double navScale;
 
 void parseMessage(ReceivedMessage& msg);

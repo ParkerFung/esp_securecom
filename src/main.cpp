@@ -8,7 +8,6 @@
 #include "navigation/nav_interface.h"
 #include <vector>
 
-
 std::vector<ReceivedMessage> receivedMessages;
 
 bool newMessageReceived = false;
@@ -35,8 +34,6 @@ void setup() {
   initRadio();
   initDisplay();
 }
-
-
 
 void loop() {
   readGPS();
@@ -72,7 +69,6 @@ void loop() {
   delay(10);
 
 }
-
 
 void parseMessage(ReceivedMessage& msg) {
   msg.raw.trim();

@@ -6,12 +6,11 @@
 
 
 extern bool navBlinkState;
-
+extern double navScale = 10.0;
 
 void nav_display(double targetLat, double targetLng){
 
   display.clearDisplay();
-
 
   //top of UI
   if(gps.location.isValid()){
@@ -28,14 +27,8 @@ void nav_display(double targetLat, double targetLng){
   double dLat = latDistance(currentLat,targetLat);
   double dLng = lngDistance(currentLng, targetLng, (currentLat + targetLat) / 2.0);
 
-
-  double scale = 10.0; //default to 10m per tic mark
-  if (distance > 100 && distance <= 1000) scale = 50.0;
-  else if(distance > 1000) scale = 100.0;
-
   const int originX = 64;
   const int originY = 40;
-
 
   display.drawLine(0, originY, 127, originY, SSD1306_WHITE); //x axis
   display.drawLine(originX, 17, originX, 63, SSD1306_WHITE); //y axis
@@ -53,8 +46,7 @@ void nav_display(double targetLat, double targetLng){
     }
   }
 
-
-  double metersPerPixel = scale / 10.0; //convert distance to pixels
+  double metersPerPixel = navScale / 10.0; //convert distance to pixels
 
   int xOffset = (int)(dLng / metersPerPixel);
   int yOffset = (int)(dLat / metersPerPixel);
@@ -75,57 +67,52 @@ void nav_display(double targetLat, double targetLng){
   }
   else{
     display.setCursor(0,20);
-    display.println("WAITING FOR GPS...");
+  }
   }
 
+  //-------------------------------------------
+  int scaleBarX = 5;
+  int scaleBarY = 60;
+  int maxScaleBarWidth = 30; 
+
+  double metersPerPixel = navScale / 10.0;
+  double scaleBarDistance = metersPerPixel * maxScaleBarWidth;
+
+  int scaleOptions[] = {10, 20, 50, 100, 200, 500, 1000, 2000, 5000};
+  int chosenDistance = scaleOptions[0];
+
+  for (int i = 0; i < sizeof(scaleOptions) / sizeof(scaleOptions[0]); i++) {
+    if (scaleOptions[i] > scaleBarDistance) {
+      chosenDistance = scaleOptions[i];
+      break;
+    }
   }
+
+  int barWidthPixels = chosenDistance / metersPerPixel;
+  if (barWidthPixels > maxScaleBarWidth) {
+    barWidthPixels = maxScaleBarWidth;
+  }
+
+  display.drawLine(scaleBarX, scaleBarY, scaleBarX + barWidthPixels, scaleBarY, SSD1306_WHITE);
+
+  display.drawPixel(scaleBarX, scaleBarY - 1, SSD1306_WHITE);
+  display.drawPixel(scaleBarX + barWidthPixels, scaleBarY - 1, SSD1306_WHITE);
+
+  int labelX = scaleBarX + barWidthPixels + 2;
+  int labelY = scaleBarY - 4;
+
+  display.setCursor(labelX, labelY);
+  display.setTextSize(1);
+  display.setTextColor(SSD1306_WHITE);
+
+  if (chosenDistance >= 1000) {
+    display.print(chosenDistance / 1000);
+    display.println(" km");
+  } else {
+    display.print(chosenDistance);
+    display.println(" m");
+  }
+
+  //-----------------------------------------------
   display.display();
 }
-// void nav_display(double targetLat, double targetLng){
-
-//     display.clearDisplay();
-//     display.setCursor(0,0);
-
-//     display.println("distance to target");
-
-//   display.setCursor(0,20);
-
-//   if(gps.location.isValid()){
-//     float currentLat = gps.location.lat();
-//     float currentLng = gps.location.lng();
-
-//     double dLat = latDistance(currentLat,targetLat);
-//     double dLng = lngDistance(currentLng, targetLng, (currentLat + targetLat) / 2.0);
-//     double distance = getDistance(currentLat, currentLng, targetLat, targetLng);
-
-//     display.setCursor(0,20);
-//     display.print(distance, 3);
-//     display.println("m");
-
-
-//     display.setCursor(0,35);
-//     display.print("D_LAT: ");
-//     display.print(dLat);
-//     display.println("m");
-
-//     display.setCursor(0, 50);
-//     display.print("D_LNG: ");
-//     display.print(dLng);
-//     display.println("m");
-//   }
-//   else{
-//     display.setCursor(0,20);
-//     display.println("WAITING FOR GPS...");
-//   }
-
-//   display.display();
-
-
-
-// }
-
-// void drawNav(){
-
-//   display.drawLine(10,0, 10, 80, SSD1306_WHITE);
-
-// }

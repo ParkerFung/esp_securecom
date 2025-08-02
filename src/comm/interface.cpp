@@ -14,17 +14,16 @@ int selectedItemAffirmative = 0;
 int selectedItemNegative = 0;
 
 const char* affirmativeMessages[]{
-  "OK",
-  "Yes",
+  "Confirmed",
+  "Success",
   "All Clear",
-  "Good",
 };
 const int affirmativeMessageCount = sizeof(affirmativeMessages) / sizeof(affirmativeMessages[0]);
 
 const char* negativeMessages[]{
-  "No",
-  "Not clear",
-  "Bad",
+  "Negative",
+  "Failure",
+  "Rejected",
 };
 const int negativeMessageCount = sizeof(negativeMessages) / sizeof(negativeMessages[0]);
 
